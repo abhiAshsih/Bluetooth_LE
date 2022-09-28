@@ -2,16 +2,33 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <EditText
+        android:id="@+id/wifi_ssid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:ems="10"
+        android:hint="SSID"
+        android:inputType="textPersonName"
+        android:minHeight="48dp" />
+
+    <EditText
+        android:id="@+id/wifi_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:ems="10"
+        android:hint="Password"
+        android:inputType="textPassword"
+        android:minHeight="48dp" />
 
     <Button
         android:id="@+id/advertise_btn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Advertise"/>
-    <Button
-        android:id="@+id/advertise_stop_btn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Stop-Advertise"/>
+        android:layout_margin="10dp"
+        android:text="Advertise" />
 </LinearLayout>

@@ -28,6 +28,7 @@ import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.nio.charset.Charset;
@@ -37,18 +38,17 @@ import java.util.List;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
-    private Button mAdvertiseButton, stopAdvertiseButton;
+    private Button mAdvertiseButton;
     private static final String TAG = "BLEApp";
     private BluetoothAdapter mBluetoothAdapter;
     public static final int REQUEST_ENABLE_BT = 1;
     private int STORAGE_PERMISSION_CODE = 1;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mAdvertiseButton = (Button) findViewById(R.id.advertise_btn);
-        stopAdvertiseButton = (Button) findViewById(R.id.advertise_stop_btn);
+
 
         mAdvertiseButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,7 +66,10 @@ public class MainActivity extends AppCompatActivity {
                         if (mBluetoothAdapter.isMultipleAdvertisementSupported()) {
 
                             // Everything is supported and enabled, load the method
-                            advertise();
+                            EditText wifiSsid=(EditText)findViewById(R.id.wifi_ssid);
+                            EditText wifiPassword=(EditText)findViewById(R.id.wifi_password);
+
+                            advertise(wifiSsid.getText().toString(),wifiPassword.getText().toString());
 
                         } else {
 
@@ -86,59 +89,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        stopAdvertiseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                   stopAdv();
-            }
-        });
-
-
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void stopAdv() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            AdvertisingSetCallback callback = new AdvertisingSetCallback() {
-                @Override
-                public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int txPower, int status) {
-                    Log.i(TAG, "onAdvertisingSetStarted(): txPower:" + txPower + " , status: "
-                            + status);
-                    //currentAdvertisingSet = advertisingSet;
-                }
-
-                @Override
-                public void onAdvertisingDataSet(AdvertisingSet advertisingSet, int status) {
-                    Log.i(TAG, "onAdvertisingDataSet() :status:" + status);
-                }
-
-                @Override
-                public void onScanResponseDataSet(AdvertisingSet advertisingSet, int status) {
-                    Log.i(TAG, "onScanResponseDataSet(): status:" + status);
-                }
-
-                @Override
-                public void onAdvertisingSetStopped(AdvertisingSet advertisingSet) {
-                    Log.i(TAG, "onAdvertisingSetStopped():");
-                }
-            };
-            BluetoothLeAdvertiser advertiser = BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser();
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADVERTISE) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            advertiser.stopAdvertisingSet(callback);
-        }
-    }
-
-
-    private void advertise() {
+    private void advertise(String wifiSsid,String wifiPassword) {
 
         BluetoothLeAdvertiser advertiser = BluetoothAdapter.getDefaultAdapter().getBluetoothLeAdvertiser();
         AdvertisingSetParameters parameters = null;
@@ -151,29 +104,24 @@ public class MainActivity extends AppCompatActivity {
                     .build();
         }
 
+        String wifiInfo=wifiSsid+ " " +wifiPassword;
+        Log.i(TAG,wifiInfo);
+        //Retreive Wifi SSID
+//        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+//        WifiInfo wifiInfo;
+//
+//        wifiInfo = wifiManager.getConnectionInfo();
+//        if (wifiInfo.getSupplicantState() == SupplicantState.COMPLETED) {
+//            ssid = wifiInfo.getSSID();
+//            Log.i(TAG,ssid);
+//        }
 
-        String testData = "ADG";
-        byte[] testData1 = testData.getBytes();
-
-        String ssid = null;
-
-        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        WifiInfo wifiInfo;
-
-        wifiInfo = wifiManager.getConnectionInfo();
-        if (wifiInfo.getSupplicantState() == SupplicantState.COMPLETED) {
-            ssid = wifiInfo.getSSID();
-            Log.i(TAG,ssid);
-        }
-
-
-        //byte[] testData2=ssid.getBytes();
         ParcelUuid pUuid = new ParcelUuid(UUID.fromString("FDA0B2D9-2E47-48B3-BCFC-AFFD91E932CA"));
 
         AdvertiseData data = (new AdvertiseData.Builder())
-                .addManufacturerData(1, ssid.getBytes(Charset.forName("UTF-8")))
+                .addManufacturerData(1, wifiInfo.getBytes(Charset.forName("UTF-8")))
                 //.addServiceData( pUuid, ssid.getBytes(Charset.forName("UTF-8") ) )
-                .setIncludeDeviceName(true)
+                .setIncludeDeviceName(false)
                 .build();
         //.addServiceData( pUuid, "Data".getBytes(Charset.forName("UTF-8") ) )
 
@@ -214,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.BLUETOOTH,Manifest.permission.BLUETOOTH_ADMIN}, STORAGE_PERMISSION_CODE);
 
             }else{
-                boolean isNameChanged = BluetoothAdapter.getDefaultAdapter().setName("Byjus");
+                boolean isNameChanged = BluetoothAdapter.getDefaultAdapter().setName("BYJUs");
                 advertiser.startAdvertisingSet(parameters, data, null, null, null, callback);
                 Toast.makeText(MainActivity.this, "Data : " + data, Toast.LENGTH_LONG).show();
             }
